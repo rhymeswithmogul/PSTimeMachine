@@ -3,7 +3,7 @@ One day, I was so mad at a backup vendor *and* at Windows Server Backup, that I 
 
 Apple's Time Machine and <a href="https://git.samba.org/?p=rsync.git"><tt>rsync</tt></a> were the inspirations for this:
 * **Versioned:** Every time the tool runs, a new folder tree is created.
-* **Secure:**    Old backups are never modified by this tool.
+* **Secure:**    Old backups are never added to nor modified by this tool.
 * **Simple:**    It creates entire, browseable folder trees at the destination that require no tools to restore from.
 * **Efficient:** Only changed files are copied from the source to the destination; unchanged files are added with filesystem-level hard links.
 
