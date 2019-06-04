@@ -1,5 +1,10 @@
 # PSTimeMachine Change Log
 
+## Version 1.0.2 (2019-06-03)
+ - Fixed a bug where an initial or -NoHardLinks backup would not show verbose errors when -Verbose was supplied.
+ - Fixed a bug where the script would terminate before completion if transcription were not enabled.
+ - More example documentation.
+
 ## Version 1.0.1 (2019-04-15)
  - Changed the log file name from global to script scope.
  - The source path is now validated to make sure it is a valid path and that it exists.

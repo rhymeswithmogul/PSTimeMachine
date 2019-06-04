@@ -1,6 +1,6 @@
 <#
 .NOTES
-PSTimeMachine.ps1 - Version 1.0.1
+PSTimeMachine.ps1 - Version 1.0.2
 (c) 2019 Colin Cogle <colin@colincogle.name>
 
 This program is free software:  you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -46,7 +46,24 @@ Do not create a log file inside the backup folder.  By default, all output is re
 Suppress statistics after a successful backup.  Statistics are not reported for copy-only backups.
 
 .EXAMPLE
-PS C:\> .\PSTimeMachine.ps1 -SourcePath C:\Users\jdoe -DestinationPath D:\Backups
+PS C:\> .\PSTimeMachine.ps1 -SourcePath C:\Users\jdoe -DestinationPath "D:\Backups"
+
+This backs up C:\Users\jdoe to D:\Backups.
+
+.EXAMPLE
+PS C:\Users\jdoe> Get-Location | .\PSTimeMachine.ps1 -DestinationPath "D:\Backups"
+
+This also backs up C:\Users\jdoe to D:\Backups.
+
+.EXAMPLE
+PS C:\> Get-Item "C:\Users\jdoe" | .\PSTimeMachine.ps1 -DestinationPath "D:\Backups"
+
+This also backs up C:\Users\jdoe to D:\Backups.
+
+.EXAMPLE
+PS C:\Users> Get-ChildItem "jdoe" | .\PSTimeMachine.ps1 -DestinationPath "D:\Backups"
+
+This also backs up C:\Users\jdoe to D:\Backups.
 #>
 
 #Requires -Version 5
@@ -54,7 +71,7 @@ PS C:\> .\PSTimeMachine.ps1 -SourcePath C:\Users\jdoe -DestinationPath D:\Backup
 [CmdletBinding()]
 Param(
 	[Parameter(Mandatory, Position=0, ValueFromPipeline=$true)]
-	[Alias("Source", "Path")]
+	[Alias("Name", "Source", "Path")]
 	[ValidateNotNullOrEmpty()]
 	[ValidateScript({Test-Path -Path $_})]
 	[String]$SourcePath,
@@ -84,7 +101,7 @@ New-Variable -Option Constant -Name Today      -Value (Get-Date)
 New-Variable -Option Constant -Name FolderName -Value (("{0:yyyy}-{0:MM}-{0:dd}T{0:hh}-{0:mm}-{0:ss}" -f $Today) + ".inProgress")
 
 # Start logging?
-If ($NoLogging) {
+If (-Not $NoLogging) {
 	$script:LogFile = (New-TemporaryFile)
 	Start-Transcript -Path (($script:LogFile).Name)
 }
@@ -130,7 +147,9 @@ Try {
 				Throw [System.Management.Automation.ItemNotFoundException] "No previous backups were found. Exiting at user request."
 			}
 			Write-Verbose "No previous backups exist.  Creating an initial backup."
-			Copy-Item -Path (Join-Path -Path $SourcePath "*") -Destination (Join-Path -Path $DestinationPath $FolderName) -Recurse
+			
+			$DoVerboseCopy = $VerbosePreference -eq "Continue"
+			Copy-Item -Path (Join-Path -Path $SourcePath "*") -Destination (Join-Path -Path $DestinationPath $FolderName) -Recurse -Verbose:$DoVerboseCopy
 		}
 		Else {
 			# Get the most recent backup name.
@@ -183,7 +202,7 @@ Catch {
 Finally {
 	If (-Not $NoLogging) {
 		Write-Verbose "Moving log file to backup destination."
-		Stop-Transcript
+		Stop-Transcript -ErrorAction SilentlyContinue
 		Write-Debug "Moving $($_.FullName) to $(Join-Path -Path $DestinationPath 'PSTimeMachine.log')"
 		Move-Item -Path (($script:LogFile).Name) -Destination (Join-Path -Path $DestinationPath $FolderName "PSTimeMachine.log") -ErrorAction Continue
 	}
