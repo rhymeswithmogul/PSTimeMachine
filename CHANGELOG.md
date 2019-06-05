@@ -1,5 +1,10 @@
 # PSTimeMachine Change Log
 
+## Version 1.0.3 (in progress)
+ - If a file is in use and can't be copied, PSTimeMachine will now keep running instead of terminating.
+ - If a copy-only backup is performed, file names will now be written to the log file.
+ - Resolve-Path has replaced -Replace for calculating relative paths.
+
 ## Version 1.0.2 (2019-06-03)
  - Fixed a bug where an initial or -NoHardLinks backup would not show verbose errors when -Verbose was supplied.
  - Fixed a bug where the script would terminate before completion if transcription were not enabled.
